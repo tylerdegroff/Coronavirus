@@ -1,5 +1,5 @@
 ---
-title: ""
+title: "Coronavirus Second Wave"
 author: "Tyler DeGroff"
 date: "6/26/2020"
 output: pdf_document
