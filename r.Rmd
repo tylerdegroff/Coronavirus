@@ -81,7 +81,7 @@ data <- data %>%
   )
 ```
 
-```{r}
+```{r, results = "hide"}
 data <- data[order(data$date, data$state, data$county), ]
 states <- sort(unique(data$state))
 temp <- data.frame()
@@ -104,11 +104,14 @@ for (i in 1:length(states)) {
     
     temp <- rbind(temp, temp2)
     
+    print(paste(states[i], "->", counties[j]))
+    
   }
   
 }
 
 data <- temp
+
 rm(list = c("i", "j", ls(pattern = "temp")))
 ```
 
