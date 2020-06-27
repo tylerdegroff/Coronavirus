@@ -10,6 +10,8 @@ editor_options:
 ```{r, message = FALSE}
 rm(list = ls())
 library(tidyverse)
+library(readxl)
+library(httr)
 ```
 
 ```{r}
@@ -22,6 +24,20 @@ data <- data %>%
   mutate(date = as.Date(date))
 
 data <- within(data, fips[county == "New York City"] <- 99999) # treats NYC as a county
+```
+
+```{r}
+GET(
+  "https://www2.census.gov/programs-surveys/popest/geographies/2019/state-geocodes-v2019.xlsx",
+  write_disk(temp <- tempfile())
+)
+
+fips.state <- read_excel(temp, skip = 4) %>%
+  rename(fips = "State (FIPS)", state = "Name") %>%
+  select(fips, state) %>%
+  mutate(fips = as.numeric(fips)) %>%
+  filter(fips != 0) %>%
+  arrange(fips)
 ```
 
 ```{r}
