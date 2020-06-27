@@ -68,6 +68,27 @@ fips <- merge(
 fips <- fips[complete.cases(fips[, "state"]), ]
 ```
 
+```{r}
+GET(
+  "https://www2.census.gov/programs-surveys/popest/tables/2010-2019/counties/totals/co-est2019-annres.xlsx",
+  write_disk(temp <- tempfile())
+)
+
+pop <- read_excel(temp, skip = 3) %>%
+  rename(countyState = "...1", population = "2019") %>%
+  select(countyState, population) %>%
+  filter(countyState != "United States") %>%
+  mutate(countyState = sub(".", "", countyState))
+
+fips <- fips %>% mutate(countyState = paste0(county, ", ", state))
+
+pop <- merge(
+  x = pop,
+  y = fips,
+  by = "countyState",
+  all.x = TRUE
+)
+```
 
 ```{r}
 population <- read.csv(
