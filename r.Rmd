@@ -33,12 +33,41 @@ GET(
 )
 
 fips.state <- read_excel(temp, skip = 4) %>%
-  rename(fips = "State (FIPS)", state = "Name") %>%
-  select(fips, state) %>%
-  mutate(fips = as.numeric(fips)) %>%
-  filter(fips != 0) %>%
+  rename(fips.state = "State (FIPS)", state = "Name") %>%
+  select(fips.state, state) %>%
+  filter(fips.state != "00") %>%
+  arrange(fips.state)
+```
+
+```{r}
+GET(
+  "https://www2.census.gov/programs-surveys/popest/geographies/2019/all-geocodes-v2019.xlsx",
+  write_disk(temp <- tempfile())
+)
+
+fips.county <- read_excel(temp, skip = 4) %>%
+  rename(
+    fips.state = "State Code (FIPS)", 
+    fips.county = "County Code (FIPS)",
+    county = "Area Name (including legal/statistical area description)"
+  ) %>%
+  mutate(fips = paste0(as.character(fips.state), as.character(fips.county))) %>%
+  select(fips, fips.state, fips.county, county) %>%
+  filter(fips.county != "000") %>%
   arrange(fips)
 ```
+
+```{r}
+fips <- merge(
+  x = fips.county,
+  y = fips.state,
+  by = "fips.state",
+  all.x = TRUE
+)
+
+fips <- fips[complete.cases(fips[, "state"]), ]
+```
+
 
 ```{r}
 population <- read.csv(
