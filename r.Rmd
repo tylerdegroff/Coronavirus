@@ -139,3 +139,15 @@ rm(list = c("i", "j", ls(pattern = "temp")))
 ```{r}
 write_csv(data, "data.csv")
 ```
+
+\newpage
+
+# References
+
+New York Times, The, Smith, M., Yourish, K., Almukhtar, S., Collins, K., Ivory, D., & Harmon, A. (2020, January 21–June 28). Coronavirus (Covid-19) Data in the United States (commit 4376628aea306f4835367d4f12dacfadc4452fcd) [Cumulative counts of coronavirus cases in the United States, at the county level, over time.]. Github. https://bit.ly/2Zf5f3y
+
+United States Census Bureau. (2010–2019, April 1–July 1). County Population Totals: 2010-2019 [Annual estimates of the county-level resident population, over time.]. United States Department of Commerce. https://bit.ly/2ZlIA5B
+
+United States Census Bureau. (2019, January 1). 2019 Census Bureau Region and Division Codes and State FIPS Codes [Reference file for vintage 2019 Census Bureau state-level FIPS codes.]. United States Department of Commerce. https://bit.ly/2AiMxQa
+
+United States Census Bureau. (2019, January 1). 2019 State, County, Minor Civil Division, and Incorporated Place FIPS Codes [Reference file for vintage 2019 Census Bureau county-level FIPS codes.]. United States Department of Commerce. https://bit.ly/2Vs2KJW
