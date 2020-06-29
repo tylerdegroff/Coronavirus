@@ -1,7 +1,7 @@
 ---
-title: "Coronavirus Second Wave"
+title: "Coronavirus Second Waves"
 author: "Tyler DeGroff"
-date: "6/26/2020"
+date: "6/28/2020"
 output: pdf_document
 editor_options: 
   chunk_output_type: console
@@ -11,28 +11,21 @@ editor_options:
 rm(list = ls())
 library(tidyverse)
 library(readxl)
-library(httr)
 ```
 
 ```{r}
-data <- read.csv(
-  'https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv'
-)
+# sauce: https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv
 
-data <- data %>% 
+data <- read.csv("https://bit.ly/2Bk6bLV") %>% 
   filter(county != "Unknown") %>%
-  mutate(date = as.Date(date))
-
-data <- within(data, fips[county == "New York City"] <- 36999) # treats NYC as a county
+  mutate(date = as.Date(date)) %>%
+  within(., fips[county == "New York City"] <- 36999) # treats NYC as a county
 ```
 
 ```{r}
-GET(
-  "https://www2.census.gov/programs-surveys/popest/geographies/2019/state-geocodes-v2019.xlsx",
-  write_disk(temp <- tempfile())
-)
+# sauce: https://www2.census.gov/programs-surveys/popest/geographies/2019/state-geocodes-v2019.xlsx
 
-fips.state <- read_excel(temp, skip = 4) %>%
+fips.state <- read_excel("fips.state.xlsx", skip = 4) %>%
   rename(fips.state = "State (FIPS)", state = "Name") %>%
   select(fips.state, state) %>%
   filter(fips.state != "00") %>%
@@ -40,72 +33,47 @@ fips.state <- read_excel(temp, skip = 4) %>%
 ```
 
 ```{r}
-GET(
-  "https://www2.census.gov/programs-surveys/popest/geographies/2019/all-geocodes-v2019.xlsx",
-  write_disk(temp <- tempfile())
-)
+# sauce: https://www2.census.gov/programs-surveys/popest/geographies/2019/all-geocodes-v2019.xlsx
 
-fips.county <- read_excel(temp, skip = 4) %>%
+fips.county <- read_excel("fips.granular.xlsx", skip = 4) %>%
   rename(
     fips.state = "State Code (FIPS)", 
     fips.county = "County Code (FIPS)",
     county = "Area Name (including legal/statistical area description)"
   ) %>%
-  mutate(
-    fips = as.numeric(paste0(as.character(fips.state), as.character(fips.county)))
-  ) %>%
-  select(fips, fips.state, fips.county, county) %>%
+  mutate(fips = as.numeric(paste0(
+    as.character(fips.state), 
+    as.character(fips.county)
+  ))) %>%
   filter(fips.county != "000") %>%
-  arrange(fips)
+  select(fips, fips.state, fips.county, county)
 ```
 
 ```{r}
-fips <- merge(
-  x = fips.county,
-  y = fips.state,
-  by = "fips.state",
-  all.x = TRUE
-)
-
+fips <- merge(x = fips.county, y = fips.state, by = "fips.state", all.x = TRUE)
 fips <- fips[complete.cases(fips[, "state"]), ]
 ```
 
 ```{r}
-GET(
-  "https://www2.census.gov/programs-surveys/popest/tables/2010-2019/counties/totals/co-est2019-annres.xlsx",
-  write_disk(temp <- tempfile())
-)
+# sauce: https://www2.census.gov/programs-surveys/popest/tables/2010-2019/counties/totals/co-est2019-annres.xlsx
 
-pop <- read_excel(temp, skip = 3) %>%
+pop <- read_excel("pop.xlsx", skip = 3) %>%
   rename(countyState = "...1", population = "2019") %>%
-  select(countyState, population) %>%
   filter(countyState != "United States") %>%
-  mutate(
-    countyState = ifelse(
-      countyState == "Bottineau County, North Dakota", 
-      ".Bottineau County, North Dakota", # accounts for a one-time data issue at source
-      countyState
-    ), 
-    countyState = sub(".", "", countyState))
+  select(countyState, population)
 
 fips <- fips %>% mutate(countyState = paste0(county, ", ", state))
-
-pop <- merge(
-  x = pop,
-  y = fips,
-  by = "countyState",
-  all.x = TRUE
-)
+pop <- merge(x = pop, y = fips, by = "countyState", all.x = TRUE)
 ```
 
 ```{r}
 pop.nyc <- pop %>%
   filter(
-    fips == 36005 | # Bronx County or Bronx
-    fips == 36047 | # Kings County or Brooklyn
-    fips == 36061 | # New York County or Manhattan
-    fips == 36081 | # Queens County or Queens
-    fips == 36085   # Richmond County or Staten Island
+    fips == 36005 | # Bronx County (Bronx)
+    fips == 36047 | # Kings County (Brooklyn)
+    fips == 36061 | # New York County (Manhattan)
+    fips == 36081 | # Queens County (Queens)
+    fips == 36085   # Richmond County (Staten Island)
   )
 
 pop <- rbind(
@@ -123,17 +91,9 @@ pop <- rbind(
 ```
 
 ```{r}
-data <- merge(
-  x = data, 
-  y = pop %>% select(fips, population),
-  by = "fips",
-  all.x = TRUE
-)
+data <- merge(x = data, y = pop %>% select(fips, population), by = "fips", all.x = TRUE)
 
-# county-level cases and deaths per capita or per 100K data only valid for New York State
-# county-level population data was not imported for any other state. NAs result.
-
-data <- data %>% 
+data <- data %>%
   mutate(
     cases.percap = cases / population,
     cases.per100k = cases / (population / 100000),
@@ -155,7 +115,7 @@ for (i in 1:length(states)) {
     
     temp2 <- data %>% 
       filter(
-        state == states[i],
+        state == states[i], 
         county == counties[j]
       ) %>%
       mutate(
