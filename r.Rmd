@@ -114,9 +114,7 @@ data <- merge(
 data <- data %>%
   mutate(
     cases.percap = cases / population,
-    cases.per100k = cases / (population / 100000),
-    deaths.percap = deaths / population,
-    deaths.per100k = deaths / (population / 100000)
+    deaths.percap = deaths / population
   )
 ```
 
@@ -135,7 +133,32 @@ data <- data %>%
 ```
 
 ```{r}
+data.state <- data %>%
+  
+  mutate(dateState = paste0(date, ", ", state)) %>%
+  group_by(dateState) %>%
+  summarize(
+    date = date[1],
+    state = state[1],
+    cases = sum(cases),
+    deaths = sum(deaths),
+    pop = sum(population)
+  ) %>%
+  mutate(
+    cases.perCap = cases / pop,
+    deaths.perCap = deaths / pop
+  ) %>%
+  
+  group_by(state) %>%
+  mutate(
+    cases.new = c(cases[1], diff(cases)),
+    deaths.new = c(deaths[1], diff(deaths))
+  )
+```
+
+```{r}
 write_csv(data, "data.csv")
+write_csv(data.state, "data.state.csv")
 ```
 
 \newpage
