@@ -1,7 +1,7 @@
 ---
 title: "Coronavirus Second Waves"
 author: "Tyler DeGroff"
-date: "6/28/2020"
+date: "6/29/2020"
 output: pdf_document
 editor_options: 
   chunk_output_type: console
@@ -91,7 +91,13 @@ pop <- rbind(
 ```
 
 ```{r}
-data <- merge(x = data, y = pop %>% select(fips, population), by = "fips", all.x = TRUE)
+data <- merge(
+  x = data, 
+  y = pop %>% 
+    select(fips, countyState, population), 
+  by = "fips", 
+  all.x = TRUE
+)
 
 data <- data %>%
   mutate(
@@ -104,36 +110,15 @@ data <- data %>%
 
 ```{r, results = "hide"}
 data <- data[order(data$date, data$state, data$county), ]
-states <- sort(unique(data$state))
-temp <- data.frame()
+```
 
-for (i in 1:length(states)) {
-  
-  counties <- sort(unique(data %>% filter(state == states[i]) %>% select(county))[, 1])
-  
-  for (j in 1:length(counties)) {
-    
-    temp2 <- data %>% 
-      filter(
-        state == states[i], 
-        county == counties[j]
-      ) %>%
-      mutate(
-        cases.new = c(cases[1], diff(cases)),
-        deaths.new = c(deaths[1], diff(deaths))
-      )
-    
-    temp <- rbind(temp, temp2)
-    
-    print(paste(states[i], "->", counties[j]))
-    
-  }
-  
-}
-
-data <- temp
-
-rm(list = c("i", "j", ls(pattern = "temp")))
+```{r}
+data <- data %>%
+  group_by(countyState) %>%
+  mutate(
+    cases.new1 = c(cases[1], diff(cases)),
+    deaths.new1 = c(deaths[1], diff(deaths))
+  )
 ```
 
 ```{r}
@@ -144,10 +129,10 @@ write_csv(data, "data.csv")
 
 # References
 
-New York Times, The, Smith, M., Yourish, K., Almukhtar, S., Collins, K., Ivory, D., & Harmon, A. (2020, January 21–June 28). Coronavirus (Covid-19) Data in the United States (commit 4376628aea306f4835367d4f12dacfadc4452fcd) [Cumulative counts of coronavirus cases in the United States, at the county level, over time.]. Github. https://bit.ly/2Zf5f3y
+New York Times, The, Smith, M., Yourish, K., Almukhtar, S., Collins, K., Ivory, D., & Harmon, A. (2020). Coronavirus (Covid-19) Data in the United States [Cumulative counts of coronavirus cases in the United States, at the county level, over time (daily frequency).]. Github. https://bit.ly/2Zf5f3y
 
-United States Census Bureau. (2010–2019, April 1–July 1). County Population Totals: 2010-2019 [Annual estimates of the county-level resident population, over time.]. United States Department of Commerce. https://bit.ly/2ZlIA5B
+United States Census Bureau. (2010–2019, April 1–July 1). County Population Totals: 2010-2019 [Annual estimates of the county-level resident population, over time (annual frequency).]. United States Department of Commerce. https://bit.ly/2ZlIA5B
 
-United States Census Bureau. (2019, January 1). 2019 Census Bureau Region and Division Codes and State FIPS Codes [Reference file for vintage 2019 Census Bureau state-level FIPS codes.]. United States Department of Commerce. https://bit.ly/2AiMxQa
+United States Census Bureau. (2019). 2019 Census Bureau Region and Division Codes and State FIPS Codes [Reference file for vintage 2019 Census Bureau state-level FIPS codes.]. United States Department of Commerce. https://bit.ly/2AiMxQa
 
-United States Census Bureau. (2019, January 1). 2019 State, County, Minor Civil Division, and Incorporated Place FIPS Codes [Reference file for vintage 2019 Census Bureau county-level FIPS codes.]. United States Department of Commerce. https://bit.ly/2Vs2KJW
+United States Census Bureau. (2019). 2019 State, County, Minor Civil Division, and Incorporated Place FIPS Codes [Reference file for vintage 2019 Census Bureau county-level FIPS codes.]. United States Department of Commerce. https://bit.ly/2Vs2KJW
