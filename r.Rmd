@@ -116,8 +116,8 @@ data <- data[order(data$date, data$state, data$county), ]
 data <- data %>%
   group_by(countyState) %>%
   mutate(
-    cases.new1 = c(cases[1], diff(cases)),
-    deaths.new1 = c(deaths[1], diff(deaths))
+    cases.new = c(cases[1], diff(cases)),
+    deaths.new = c(deaths[1], diff(deaths))
   )
 ```
 
