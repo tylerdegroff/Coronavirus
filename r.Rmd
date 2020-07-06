@@ -1,7 +1,6 @@
 ---
 title: "Coronavirus Second Waves"
 author: "Tyler DeGroff"
-date: "7/1/2020"
 output: pdf_document
 editor_options: 
   chunk_output_type: console
@@ -151,15 +150,6 @@ data <- data %>%
     
   )
 ```
-
-```{r}
-data %>% 
-  filter(date == as.Date("2020-04-15")) %>%
-  group_by(state) %>%
-  summarize(sum = sum(cases.new.7dsma)) %>%
-  filter(state == "New York")
-```
-
 
 ```{r}
 data.state <- data %>%
