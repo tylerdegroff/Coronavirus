@@ -9,9 +9,10 @@ editor_options:
 # Setup
 
 ```{r, warning = FALSE, message = FALSE}
-library(tidyverse)
 library(readxl)
+library(dplyr)
 library(zoo)
+library(readr)
 ```
 
 # Import Data
@@ -22,7 +23,7 @@ library(zoo)
 nytimes <- read.csv("https://bit.ly/2Bk6bLV")
 ```
 
-**Source:** New York Times, The, Smith, M., Yourish, K., Almukhtar, S., Collins, K., Ivory, D., & Harmon, A. (2020, January 21–June 30). *Coronavirus (Covid-19) Data in the United States* (commit 8ce34c415c4f14b6437b95ca6e41a9e1fd9c7068) [Cumulative counts of coronavirus cases in the United States, at the county level, over time (daily frequency).]. Github. https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv
+**Source:** New York Times, The, Smith, M., Yourish, K., Almukhtar, S., Collins, K., Ivory, D., & Harmon, A. (2020, January–July). *Coronavirus (Covid-19) Data in the United States* [Cumulative counts of coronavirus cases in the United States, at the county level, over time (daily frequency).]. Github. https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv
 
 ```{r}
 data <- nytimes %>% 
