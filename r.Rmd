@@ -174,9 +174,37 @@ data.state <- data %>%
   # mutate across individual states, exclusively
   
   group_by(state) %>%
+  
   mutate(
     cases.new = c(cases[1], diff(cases)),
-    deaths.new = c(deaths[1], diff(deaths))
+    deaths.new = c(deaths[1], diff(deaths)),
+
+    cases.new.perCap = c(cases.perCap[1], diff(cases.perCap)),
+    deaths.new.perCap = c(deaths.perCap[1], diff(deaths.perCap)),
+    
+    cases.new.perM = cases.new.perCap * 1000000,
+    deaths.new.perM = deaths.new.perCap * 1000000
+  ) %>%
+  
+  mutate(
+    cases.new.7dsma = rollmean(cases.new, k = 7, fill = 0, align = "right"),
+    deaths.new.7dsma = rollmean(deaths.new, k = 7, fill = 0, align = "right"),
+    
+    cases.new.perCap.7dsma = 
+      rollmean(cases.new.perCap, k = 7, fill = 0, align = "right"),
+    deaths.new.perCap.7dsma = 
+      rollmean(deaths.new.perCap, k = 7, fill = 0, align = "right"),
+    
+    cases.new.perM.7dsma = 
+      rollmean(cases.new.perM, k = 7, fill = 0, align = "right"),
+    deaths.new.perM.7dsma = 
+      rollmean(deaths.new.perM, k = 7, fill = 0, align = "right"),
+  ) %>%
+  
+  mutate(
+    cases.active = rollsum(cases.new, k = 14, fill = 0, align = "right"),
+    cases.active.perCap = rollsum(cases.new.perCap, k = 14, fill = 0, align = "right"),
+    cases.active.perM = rollsum(cases.new.perM, k = 14, fill = 0, align = "right")
   )
 ```
 
