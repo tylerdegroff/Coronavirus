@@ -202,9 +202,9 @@ data.state <- data %>%
   ) %>%
   
   mutate(
-    cases.active = rollsum(cases.new, k = 14, fill = 0, align = "right"),
-    cases.active.perCap = rollsum(cases.new.perCap, k = 14, fill = 0, align = "right"),
-    cases.active.perM = rollsum(cases.new.perM, k = 14, fill = 0, align = "right")
+    cases.active = rollsum(cases.new, k = 9, fill = 0, align = "right"),
+    cases.active.perCap = rollsum(cases.new.perCap, k = 9, fill = 0, align = "right"),
+    cases.active.perM = rollsum(cases.new.perM, k = 9, fill = 0, align = "right")
   )
 ```
 
@@ -214,12 +214,14 @@ write_csv(data.state, "data.state.csv")
 ```
 
 ```{r}
+guests <- data.frame(
+  state = c("Wisconsin", "South Dakota", "Indiana", "Arizona", "Nebraska"),
+  guests = c(4, 8, 3, 4, 198 - 4 - 8 - 3 - 4)
+)
+
 wedding <- merge(
   
-  x = data.frame(
-    state = c("Wisconsin", "South Dakota", "Indiana", "Arizona", "Nebraska"),
-    guests = c(4, 8, 3, 4, 200)
-  ),
+  x = guests,
   
   y = data.state %>% 
     filter(
