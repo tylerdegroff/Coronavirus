@@ -213,31 +213,31 @@ write_csv(data, "data.csv")
 write_csv(data.state, "data.state.csv")
 ```
 
-```{r}
+```{r, message = FALSE}
 guests <- data.frame(
-  state = c("Wisconsin", "South Dakota", "Indiana", "Arizona", "Nebraska"),
-  guests = c(4, 8, 3, 4, 198 - 4 - 8 - 3 - 4)
+  state = c("Connecticut", "Wisconsin", "South Dakota", "Indiana", "Arizona", "Nebraska"),
+  guests = c(1, 4, 8, 3, 4, 198 - 8 - 3 - (4 * 2) - 1)
 )
 
 wedding <- merge(
-  
   x = guests,
-  
   y = data.state %>% 
     filter(
       date == max(date),
       state %in% unique(guests$state)
     ) %>% 
   select(cases.active.perM), 
-  
   by = "state"
-  
-) 
+) %>% arrange(desc(cases.active.perM))
 
-cases.active.perM.wavg <- weighted.mean(
+wedding
+```
+
+```{r}
+round(weighted.mean(
   x = wedding$cases.active.perM, 
   w = wedding$guests
-)
+))
 ```
 
 ```{r}
