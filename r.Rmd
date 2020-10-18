@@ -20,7 +20,9 @@ library(readr)
 ## New York Times Coronavirus Data
 
 ```{r}
-nytimes <- read.csv("https://bit.ly/2Bk6bLV")
+setwd("/Users/tylerdegroff/Documents/Github/NYTimes\ COVID-19\ Data")
+nytimes <- read.csv("us-counties.csv")
+setwd("/Users/tylerdegroff/Documents/Github/Coronavirus")
 ```
 
 **Source:** New York Times, The, Smith, M., Yourish, K., Almukhtar, S., Collins, K., Ivory, D., & Harmon, A. (2020, January–July). *Coronavirus (Covid-19) Data in the United States* [Cumulative counts of coronavirus cases in the United States, at the county level, over time (daily frequency).]. Github. https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv
