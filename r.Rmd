@@ -6,18 +6,15 @@ editor_options:
   chunk_output_type: console
 ---
 
-# Setup
-
-```{r, warning = FALSE, message = FALSE}
+```{r, warning = FALSE, message = FALSE, echo = FALSE}
 library(readxl)
 library(dplyr)
 library(zoo)
 library(readr)
+library(knitr)
 ```
 
-# Import Data
-
-## New York Times Coronavirus Data
+# Import New York Times Coronavirus Data
 
 ```{r}
 setwd("/Users/tylerdegroff/Documents/Github/NYTimes\ COVID-19\ Data")
@@ -27,6 +24,8 @@ setwd("/Users/tylerdegroff/Documents/Github/Coronavirus")
 
 **Source:** New York Times, The, Smith, M., Yourish, K., Almukhtar, S., Collins, K., Ivory, D., & Harmon, A. (2020, January–July). *Coronavirus (Covid-19) Data in the United States* [Cumulative counts of coronavirus cases in the United States, at the county level, over time (daily frequency).]. Github. https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv
 
+\bigskip
+
 ```{r}
 data <- nytimes %>% 
   filter(county != "Unknown") %>%
@@ -34,13 +33,15 @@ data <- nytimes %>%
   within(., fips[county == "New York City"] <- 36999) # treats NYC as a county
 ```
 
-## Census Bureau FIPS Code Metadata
+# Import Census Bureau FIPS Code Metadata
 
 ```{r}
 fips.state <- read_excel("fips.state.xlsx", skip = 4)
 ```
 
 **Source:** United States Census Bureau. (2020, May 20). *2019 Census Bureau Region and Division Codes and State FIPS Codes* [Reference file for vintage 2019 Census Bureau state-level FIPS codes.]. United States Department of Commerce. https://www2.census.gov/programs-surveys/popest/geographies/2019/state-geocodes-v2019.xlsx
+
+\bigskip
 
 ```{r}
 fips.state <- fips.state %>%
@@ -55,6 +56,8 @@ fips.granular <- read_excel("fips.granular.xlsx", skip = 4)
 ```
 
 **Source** United States Census Bureau. (2020, May 20). *2019 State, County, Minor Civil Division, and Incorporated Place FIPS Codes* [Reference file for vintage 2019 Census Bureau county-level FIPS codes.]. United States Department of Commerce. https://www2.census.gov/programs-surveys/popest/geographies/2019/all-geocodes-v2019.xlsx
+
+\bigskip
 
 ```{r}
 fips.county <- fips.granular %>%
@@ -76,7 +79,7 @@ fips <- merge(x = fips.county, y = fips.state, by = "fips.state", all.x = TRUE)
 fips <- fips[complete.cases(fips[, "state"]), ]
 ```
 
-## Census Bureau Population Estimates
+# Import Census Bureau Population Estimates
 
 ```{r}
 pop <- read_excel("pop.xlsx", skip = 3)
@@ -96,6 +99,8 @@ fips <- fips %>% mutate(countyState = paste0(county, ", ", state))
 pop <- merge(x = pop, y = fips, by = "countyState", all.x = TRUE)
 ```
 
+# Aggregate and Treat NYC as Its Own County
+
 ```{r}
 pop.nyc <- pop %>%
   filter(
@@ -109,9 +114,9 @@ pop.nyc <- pop %>%
 pop <- rbind(
   pop,
   data.frame(
-    fips.state = "36", # actual New York State state-level FIPS code
+    fips.state = "36",   # actual New York State state-level FIPS code
     fips.county = "999", # synthetic county-level FIPS code
-    fips = "36999", # synthetic FIPS code
+    fips = "36999",      # synthetic FIPS code
     county = "New York City",
     state = "New York",
     countyState = "New York, New York",
@@ -145,10 +150,10 @@ data <- data %>%
   
   mutate(
     
-    cases.new = c(cases[1], diff(cases)),
+    cases.new  = c(cases[1], diff(cases)),
     deaths.new = c(deaths[1], diff(deaths)),
     
-    cases.new.7dsma = rollmean(cases.new, k = 7, fill = NA, align = "right"),
+    cases.new.7dsma  = rollmean(cases.new, k = 7, fill = NA, align = "right"),
     deaths.new.7dsma = rollmean(deaths.new, k = 7, fill = NA, align = "right")
     
   )
@@ -215,10 +220,12 @@ write_csv(data, "data.csv")
 write_csv(data.state, "data.state.csv")
 ```
 
+# Analysis
+
 ```{r, message = FALSE}
 guests <- data.frame(
   state = c("Connecticut", "Wisconsin", "South Dakota", "Indiana", "Arizona", "Nebraska"),
-  guests = c(1, 4, 8, 3, 4, 198 - 8 - 3 - (4 * 2) - 1)
+  guests = c(1, 4, 8, 3, 4, 200 - 8 - 3 - (4 * 2) - 1)
 )
 
 wedding <- merge(
@@ -232,24 +239,40 @@ wedding <- merge(
   by = "state"
 ) %>% arrange(desc(cases.active.perM))
 
-wedding
+kable(
+  wedding,
+  col.names = c("State", "Guests", "Active Cases per Million")
+)
 ```
 
 ```{r}
-round(weighted.mean(
-  x = wedding$cases.active.perM, 
-  w = wedding$guests
-))
+summary <- data.frame(
+  state = "Summary",
+  guests = sum(wedding$guests),
+  cases.active.perM = weighted.mean(
+    x = wedding$cases.active.perM, 
+    w = wedding$guests
+  )
+)
+
+kable(
+  summary,
+  col.names = c("", "Total Guests", "W.Avg. Active Cases/Mln.")
+)
 ```
 
+# Binomial Probability Distriubtion Cumulative Density Function
+
+\begin{align}
+P(q > x | n, p) &= {n \choose x} p^x \left( 1 - p \right)^{\left(n - x\right)} \\
+1 - P(x > 0 | n = 200, p = \frac{3810}{10^7}) &= 1 -  \frac{200!}{0!(200-0)!}\frac{3810}{10^7} ^ 0 \left(1 - \frac{3810}{10^7}\right) ^ {200-0}
+\end{align}
+
 ```{r}
-round(
-  pbinom(
-    q = 0, 
-    size = sum(wedding$guests), 
-    prob = weighted.mean(x = wedding$cases.active.perM, w = wedding$guests) / 1000000,
-    lower.tail = FALSE
-  ), 
-  2
+pbinom(
+  q = 0, 
+  size = sum(wedding$guests), 
+  prob = weighted.mean(x = wedding$cases.active.perM, w = wedding$guests) / 1000000,
+  lower.tail = FALSE
 )
 ```
