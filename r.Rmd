@@ -265,7 +265,7 @@ kable(
 
 \begin{align}
 P(q > x | n, p) &= {n \choose x} p^x \left( 1 - p \right)^{\left(n - x\right)} \\
-1 - P(x > 0 | n = 200, p = \frac{3810}{10^7}) &= 1 -  \frac{200!}{0!(200-0)!}\frac{3810}{10^7} ^ 0 \left(1 - \frac{3810}{10^7}\right) ^ {200-0}
+1 - P(x > 0 | n = 200, p = \frac{4000.716}{10^7}) &= 1 -  \frac{200!}{0!(200-0)!}\frac{4000.716}{10^7} ^ 0 \left(1 - \frac{4000.716}{10^7}\right) ^ {200-0}
 \end{align}
 
 ```{r}
