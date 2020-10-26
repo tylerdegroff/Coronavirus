@@ -261,11 +261,13 @@ kable(
 )
 ```
 
-# Binomial Probability Distriubtion Cumulative Density Function
+# Binomial Probability Distriubtion: Cumulative Density Function
 
 \begin{align}
-P(q > x | n, p) &= {n \choose x} p^x \left( 1 - p \right)^{\left(n - x\right)} \\
-1 - P\left[x > 0 | n = `r sum(wedding$guests)`, p = `r round(weighted.mean(x = wedding$cases.active.perM, w = wedding$guests), 0)` \cdot 10^-7 \right] &= 1 - \frac{`r sum(wedding$guests)`!}{0!(`r sum(wedding$guests)`-0)!} \cdot \right) `r round(weighted.mean(x = wedding$cases.active.perM, w = wedding$guests), 0)` \cdot 10^-7 \left) ^ 0 \left(1 - `r round(weighted.mean(x = wedding$cases.active.perM, w = wedding$guests), 0)` \cdot 10^-7 \right) ^ {`r sum(wedding$guests)`-0}
+1 - P(q > x | n, p) &= 1 - {n \choose x} p^x \left( 1 - p \right)^{\left(n - x\right)} \\
+x &= 0 \\
+n &= `r sum(wedding$guests)` \\
+p &= `r round(weighted.mean(x = wedding$cases.active.perM, w = wedding$guests), 0)` \cdot 10^{-7}
 \end{align}
 
 ```{r}
