@@ -265,7 +265,7 @@ kable(
 
 \begin{align}
 P(q > x | n, p) &= {n \choose x} p^x \left( 1 - p \right)^{\left(n - x\right)} \\
-1 - P(x > 0 | n = 200, p = \frac{4000.716}{10^7}) &= 1 -  \frac{200!}{0!(200-0)!}\frac{4000.716}{10^7} ^ 0 \left(1 - \frac{4000.716}{10^7}\right) ^ {200-0}
+1 - P\left[x > 0 | n = `r sum(wedding$guests)`, p = `r round(weighted.mean(x = wedding$cases.active.perM, w = wedding$guests), 0)` \cdot 10^-7 \right] &= 1 - \frac{`r sum(wedding$guests)`!}{0!(`r sum(wedding$guests)`-0)!} \cdot \right) `r round(weighted.mean(x = wedding$cases.active.perM, w = wedding$guests), 0)` \cdot 10^-7 \left) ^ 0 \left(1 - `r round(weighted.mean(x = wedding$cases.active.perM, w = wedding$guests), 0)` \cdot 10^-7 \right) ^ {`r sum(wedding$guests)`-0}
 \end{align}
 
 ```{r}
