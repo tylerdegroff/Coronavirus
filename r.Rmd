@@ -265,9 +265,7 @@ kable(
 
 \begin{align}
 1 - P(q > x | n, p) &= 1 - {n \choose x} p^x \left( 1 - p \right)^{\left(n - x\right)} \\
-x &= 0 \\
-n &= `r sum(wedding$guests)` \\
-p &= `r round(weighted.mean(x = wedding$cases.active.perM, w = wedding$guests), 0)` \cdot 10^{-7}
+1 - P(q > x = 0 | n = `r sum(wedding$guests)`, p = `r round(weighted.mean(x = wedding$cases.active.perM, w = wedding$guests), 0)` \cdot 10^{-7}) &= 1 - {`r sum(wedding$guests)` \choose 0} `r round(weighted.mean(x = wedding$cases.active.perM, w = wedding$guests), 0)` \cdot {\left[ 10^{-7} \right]}^0 \left( 1 - `r round(weighted.mean(x = wedding$cases.active.perM, w = wedding$guests), 0)` \cdot 10^{-7} \right)^{\left(`r sum(wedding$guests)` - 0 \right)}
 \end{align}
 
 ```{r}
