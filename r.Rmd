@@ -265,7 +265,7 @@ kable(
 
 \begin{align}
 1 - P(q > x | n, p) &= 1 - {n \choose x} p^x \left( 1 - p \right)^{\left(n - x\right)} \\
-1 - P(q > x = 0 | n = `r sum(wedding$guests)`, p = `r round(weighted.mean(x = wedding$cases.active.perM, w = wedding$guests), 0)` \cdot 10^{-7}) &= 1 - {`r sum(wedding$guests)` \choose 0} `r round(weighted.mean(x = wedding$cases.active.perM, w = wedding$guests), 0)` \cdot {\left[ 10^{-7} \right]}^0 \left( 1 - `r round(weighted.mean(x = wedding$cases.active.perM, w = wedding$guests), 0)` \cdot 10^{-7} \right)^{\left(`r sum(wedding$guests)` - 0 \right)}
+1 - P(q > x = 0 | n = `r sum(wedding$guests)`, p = `r round(weighted.mean(x = wedding$cases.active.perM, w = wedding$guests), 0)` \cdot 10^{-7}) &= 1 - \left[ \frac{`r sum(wedding$guests)`!}{0! \cdot (`r sum(wedding$guests)` - 0)!} \right] \cdot {\left[`r round(weighted.mean(x = wedding$cases.active.perM, w = wedding$guests), 0)` \cdot 10^{-7} \right]}^0 \cdot \left[1 - `r round(weighted.mean(x = wedding$cases.active.perM, w = wedding$guests), 0)` \cdot 10^{-7} \right]^{`r sum(wedding$guests)` - 0}
 \end{align}
 
 ```{r}
@@ -276,3 +276,49 @@ pbinom(
   lower.tail = FALSE
 )
 ```
+
+\newpage
+
+# Binomial Probability Distriubtion: Cumulative Density Function
+
+```{r}
+eventSize <- 25000
+
+caseDensity <- pull(data.state %>%
+  ungroup() %>%
+  filter(date == max(date), state == "Nebraska") %>% 
+  select(cases.active.perM)
+)
+```
+
+\begin{align}
+1 - P(q > x | n, p) &= 1 - {n \choose x} p^x \left( 1 - p \right)^{\left(n - x\right)} \\
+1 - P(q > x | n = `r eventSize`, p = `r round(caseDensity, 0)` \cdot 10^{-7}) &= 1 - \left[ \frac{`r eventSize`!}{x! \cdot (`r eventSize` - x)!} \right] \cdot {\left[`r round(caseDensity, 0)` \cdot 10^{-7} \right]}^x \cdot \left[1 - `r round(caseDensity, 0)` \cdot 10^{-7} \right]^{`r eventSize` - x}
+\end{align}
+
+```{r}
+pbinom.iterate <- function(x = 0) {
+  
+  df <- data.frame()
+  
+  for (i in 1:x - 1) {
+    df <- rbind(
+      df,
+      data.frame(
+        infectiousPersons = paste("at least", i + 1),
+        probabilityPercent = round(pbinom(
+          q = i, size = eventSize, prob = caseDensity / 1000000, lower.tail = FALSE
+        ) * 100, 1)
+      )
+    )
+  }
+  
+  return(df)
+  
+}
+```
+
+```{r}
+kable(pbinom.iterate(100))
+```
+
