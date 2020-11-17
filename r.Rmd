@@ -17,8 +17,13 @@ library(knitr)
 # Import New York Times Coronavirus Data
 
 ```{r}
-setwd("/Users/tylerdegroff/Documents/Github/NYTimes\ COVID-19\ Data")
-nytimes <- read.csv("us-counties.csv")
+setwd("/Users/tylerdegroff/Documents/Github/NYTimes COVID-19 Data")
+
+nytimes <- read.csv(
+  file = "us-counties.csv",
+  colClasses = c("Date", "factor", "factor", "character", "numeric", "numeric")
+)
+
 setwd("/Users/tylerdegroff/Documents/Github/Coronavirus")
 ```
 
@@ -27,9 +32,29 @@ setwd("/Users/tylerdegroff/Documents/Github/Coronavirus")
 \bigskip
 
 ```{r}
-data <- nytimes %>% 
-  filter(county != "Unknown") %>%
-  mutate(date = as.Date(date)) %>%
+data <- nytimes[nytimes$state %in% c(
+  "Alabama",              "Alaska",               "Arizona", 
+  "Arkansas",             "California",           "Colorado", 
+  "Connecticut",          "Delaware",             "District of Columbia", 
+  "Florida",              "Georgia",              "Hawaii", 
+  "Idaho",                "Illinois",             "Indiana", 
+  "Iowa",                 "Kansas",               "Kentucky", 
+  "Louisiana",            "Maine",                "Maryland",
+  "Massachusetts",        "Michigan",             "Minnesota", 
+  "Mississippi",          "Missouri",             "Montana",
+  "Nebraska",             "Nevada",               "New Hampshire", 
+  "New Jersey",           "New Mexico",           "New York",
+  "North Carolina",       "North Dakota",         "Ohio", 
+  "Oklahoma",             "Oregon",               "Pennsylvania",
+  "Rhode Island",         "South Carolina",       "South Dakota", 
+  "Tennessee",            "Texas",                "Utah", 
+  "Vermont",              "Virginia",             "Washington", 
+  "West Virginia",        "Wisconsin",            "Wyoming"
+), ]
+
+data <- droplevels(data)
+
+data <- data %>% 
   within(., fips[county == "New York City"] <- 36999) # treats NYC as a county
 ```
 
@@ -220,105 +245,17 @@ write_csv(data, "data.csv")
 write_csv(data.state, "data.state.csv")
 ```
 
-# Analysis
-
-```{r, message = FALSE}
-guests <- data.frame(
-  state = c("Connecticut", "Wisconsin", "South Dakota", "Indiana", "Arizona", "Nebraska"),
-  guests = c(1, 4, 8, 3, 4, 200 - 8 - 3 - (4 * 2) - 1)
-)
-
-wedding <- merge(
-  x = guests,
-  y = data.state %>% 
-    filter(
-      date == max(date),
-      state %in% unique(guests$state)
-    ) %>% 
-  select(cases.active.perM), 
-  by = "state"
-) %>% arrange(desc(cases.active.perM))
-
-kable(
-  wedding,
-  col.names = c("State", "Guests", "Active Cases per Million")
-)
-```
-
-```{r}
-summary <- data.frame(
-  state = "Summary",
-  guests = sum(wedding$guests),
-  cases.active.perM = weighted.mean(
-    x = wedding$cases.active.perM, 
-    w = wedding$guests
-  )
-)
-
-kable(
-  summary,
-  col.names = c("", "Total Guests", "W.Avg. Active Cases/Mln.")
-)
-```
-
 # Binomial Probability Distriubtion: Cumulative Density Function
 
 \begin{align}
-1 - P(q > x | n, p) &= 1 - {n \choose x} p^x \left( 1 - p \right)^{\left(n - x\right)} \\
-1 - P(q > x = 0 | n = `r sum(wedding$guests)`, p = `r round(weighted.mean(x = wedding$cases.active.perM, w = wedding$guests), 0)` \cdot 10^{-7}) &= 1 - \left[ \frac{`r sum(wedding$guests)`!}{0! \cdot (`r sum(wedding$guests)` - 0)!} \right] \cdot {\left[`r round(weighted.mean(x = wedding$cases.active.perM, w = wedding$guests), 0)` \cdot 10^{-7} \right]}^0 \cdot \left[1 - `r round(weighted.mean(x = wedding$cases.active.perM, w = wedding$guests), 0)` \cdot 10^{-7} \right]^{`r sum(wedding$guests)` - 0}
+1 - P(q > x | n, p) &= 1 - {n \choose x} p^x \left( 1 - p \right)^{\left(n - x\right)}
 \end{align}
 
 ```{r}
 pbinom(
   q = 0, 
-  size = sum(wedding$guests), 
+  size = 100, 
   prob = weighted.mean(x = wedding$cases.active.perM, w = wedding$guests) / 1000000,
   lower.tail = FALSE
 )
 ```
-
-\newpage
-
-# Binomial Probability Distriubtion: Cumulative Density Function
-
-```{r}
-eventSize <- 25000
-
-caseDensity <- pull(data.state %>%
-  ungroup() %>%
-  filter(date == max(date), state == "Nebraska") %>% 
-  select(cases.active.perM)
-)
-```
-
-\begin{align}
-1 - P(q > x | n, p) &= 1 - {n \choose x} p^x \left( 1 - p \right)^{\left(n - x\right)} \\
-1 - P(q > x | n = `r eventSize`, p = `r round(caseDensity, 0)` \cdot 10^{-7}) &= 1 - \left[ \frac{`r eventSize`!}{x! \cdot (`r eventSize` - x)!} \right] \cdot {\left[`r round(caseDensity, 0)` \cdot 10^{-7} \right]}^x \cdot \left[1 - `r round(caseDensity, 0)` \cdot 10^{-7} \right]^{`r eventSize` - x}
-\end{align}
-
-```{r}
-pbinom.iterate <- function(x = 0) {
-  
-  df <- data.frame()
-  
-  for (i in 1:x - 1) {
-    df <- rbind(
-      df,
-      data.frame(
-        infectiousPersons = paste("at least", i + 1),
-        probabilityPercent = round(pbinom(
-          q = i, size = eventSize, prob = caseDensity / 1000000, lower.tail = FALSE
-        ) * 100, 1)
-      )
-    )
-  }
-  
-  return(df)
-  
-}
-```
-
-```{r}
-kable(pbinom.iterate(100))
-```
-
