@@ -174,58 +174,24 @@ data <- data %>%
   group_by(countyState) %>%
   
   mutate(
-    
-    cases.new  = c(cases[1], diff(cases)),
-    deaths.new = c(deaths[1], diff(deaths)),
-    
-    cases.new.7dsma  = rollmean(cases.new, k = 7, fill = NA, align = "right"),
-    deaths.new.7dsma = rollmean(deaths.new, k = 7, fill = NA, align = "right")
-    
-  )
-```
-
-```{r}
-data.state <- data %>%
-  
-  # aggregate across counties by unique date/state combination
-  
-  mutate(dateState = paste0(date, ", ", state)) %>%
-  group_by(dateState) %>%
-  summarize(
-    date = date[1],
-    state = state[1],
-    cases = sum(cases),
-    deaths = sum(deaths),
-    pop = sum(population)
-  ) %>%
-  mutate(
-    cases.perCap = cases / pop,
-    deaths.perCap = deaths / pop
-  ) %>%
-  
-  # mutate across individual states, exclusively
-  
-  group_by(state) %>%
-  
-  mutate(
     cases.new = c(cases[1], diff(cases)),
     deaths.new = c(deaths[1], diff(deaths)),
 
-    cases.new.perCap = c(cases.perCap[1], diff(cases.perCap)),
-    deaths.new.perCap = c(deaths.perCap[1], diff(deaths.perCap)),
+    cases.new.percap = c(cases.percap[1], diff(cases.percap)),
+    deaths.new.percap = c(deaths.percap[1], diff(deaths.percap)),
     
-    cases.new.perM = cases.new.perCap * 1000000,
-    deaths.new.perM = deaths.new.perCap * 1000000
+    cases.new.perM = cases.new.percap * 1000000,
+    deaths.new.perM = deaths.new.percap * 1000000
   ) %>%
   
   mutate(
     cases.new.7dsma = rollmean(cases.new, k = 7, fill = 0, align = "right"),
     deaths.new.7dsma = rollmean(deaths.new, k = 7, fill = 0, align = "right"),
     
-    cases.new.perCap.7dsma = 
-      rollmean(cases.new.perCap, k = 7, fill = 0, align = "right"),
-    deaths.new.perCap.7dsma = 
-      rollmean(deaths.new.perCap, k = 7, fill = 0, align = "right"),
+    cases.new.percap.7dsma = 
+      rollmean(cases.new.percap, k = 7, fill = 0, align = "right"),
+    deaths.new.percap.7dsma = 
+      rollmean(deaths.new.percap, k = 7, fill = 0, align = "right"),
     
     cases.new.perM.7dsma = 
       rollmean(cases.new.perM, k = 7, fill = 0, align = "right"),
@@ -235,14 +201,13 @@ data.state <- data %>%
   
   mutate(
     cases.active = rollsum(cases.new, k = 9, fill = 0, align = "right"),
-    cases.active.perCap = rollsum(cases.new.perCap, k = 9, fill = 0, align = "right"),
+    cases.active.percap = rollsum(cases.new.percap, k = 9, fill = 0, align = "right"),
     cases.active.perM = rollsum(cases.new.perM, k = 9, fill = 0, align = "right")
   )
 ```
 
 ```{r}
 write_csv(data, "data.csv")
-write_csv(data.state, "data.state.csv")
 ```
 
 # Binomial Probability Distriubtion: Cumulative Density Function
