@@ -210,17 +210,29 @@ data <- data %>%
 write_csv(data, "data.csv")
 ```
 
+\newpage
+
 # Binomial Probability Distriubtion: Cumulative Density Function
 
+```{r}
+x = 0
+n = 100
+p = as.numeric(data[
+  data$state == "New Jersey" & data$county == "Monmouth" & data$date == max(data$date),
+  "cases.active.perM"
+])
+```
+
 \begin{align}
-1 - P(q > x | n, p) &= 1 - {n \choose x} p^x \left( 1 - p \right)^{\left(n - x\right)}
+1 - P \left( q > x | n, prob \right) &= 1 - {n \choose x} \cdot prob^x \cdot \left( 1 - prob \right)^{\left(n - x\right)} \\
+1 - P \left( q > `r x` | n = `r n`, prob = `r round(p, 0)` \cdot 10^{-6} \right) &= 1 - \frac{`r n`!}{`r x`! \left( `r n` - `r x` \right) !} \cdot \left( `r round(p, 0)` \cdot 10^{-6} \right) ^ `r x` \cdot \left ( 1 - `r round(p, 0)` \cdot 10^{-6} \right)^{\left(`r n` - `r x`\right)}
 \end{align}
 
 ```{r}
 pbinom(
   q = 0, 
   size = 100, 
-  prob = weighted.mean(x = wedding$cases.active.perM, w = wedding$guests) / 1000000,
+  prob = 3945 / 1000000,
   lower.tail = FALSE
 )
 ```
