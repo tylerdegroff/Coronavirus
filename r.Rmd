@@ -218,9 +218,13 @@ write_csv(data, "data.csv")
 x = 0
 n = 100
 p = as.numeric(data[
-  data$state == "New Jersey" & data$county == "Monmouth" & data$date == max(data$date),
+  data$state == "New York" & data$county == "Westchester" & data$date == max(data$date),
   "cases.active.perM"
 ])
+```
+
+```{r}
+p
 ```
 
 \begin{align}
@@ -229,10 +233,22 @@ p = as.numeric(data[
 \end{align}
 
 ```{r}
-pbinom(
-  q = 0, 
-  size = 100, 
-  prob = 3945 / 1000000,
-  lower.tail = FALSE
+cdf <- data.frame()
+for (i in c(1, 5, 10, 25, 100, 250, 500, 1000, 2500, 5000, 10000)) {
+  
+  temp <- data.frame(
+    n = i, 
+    prob = pbinom(q = x, size = i, prob = p * 10^-6, lower.tail = FALSE) * 100
+  )
+  
+  cdf <- rbind(cdf, temp)
+  
+}
+```
+
+```{r, echo = FALSE}
+kable(
+  caption = "Probability of Exposure to AT LEAST n Actively Contageous Persons. Assumes 9-Day Infectious Period",
+  x = cdf %>% mutate(prob = round(prob, 1))
 )
 ```
