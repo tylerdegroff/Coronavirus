@@ -41,3 +41,5 @@ vignettes/*.pdf
 r.log
 *.twbr
 data.csv
+data.csv
+data.hyper
