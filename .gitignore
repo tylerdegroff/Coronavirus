@@ -37,9 +37,10 @@ vignettes/*.pdf
 
 # R Environment Variables
 .Renviron
-.DS_Store
-r.log
+
+# Manual Additions
+*.DS_Store
+*.log
 *.twbr
-data.csv
 data.csv
 data.hyper
