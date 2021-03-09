@@ -2,7 +2,6 @@
 title: "Coronavirus Second Waves"
 author: "Tyler DeGroff"
 output:
-  word_document: default
   pdf_document: default
 editor_options:
   chunk_output_type: console
@@ -29,7 +28,7 @@ nytimes <- read.csv(
 setwd("/Users/tylerdegroff/Documents/Github/Coronavirus")
 ```
 
-**Source:** New York Times, The, Smith, M., Yourish, K., Almukhtar, S., Collins, K., Ivory, D., & Harmon, A. (2020, January–July). *Coronavirus (Covid-19) Data in the United States* [Cumulative counts of coronavirus cases in the United States, at the county level, over time (daily frequency).]. Github. https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv
+**Source:** New York Times, The, Smith, M., Yourish, K., Almukhtar, S., Collins, K., Ivory, D., & Harmon, A. (2020-2021, January–January). *Coronavirus (Covid-19) Data in the United States* [Cumulative counts of coronavirus cases in the United States, at the county level, over time (daily frequency).]. Github. https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv
 
 \bigskip
 
@@ -59,6 +58,8 @@ data <- droplevels(data)
 data <- data %>% 
   within(., fips[county == "New York City"] <- 36999) # treats NYC as a county
 ```
+
+\newpage
 
 # Import Census Bureau FIPS Code Metadata
 
@@ -106,9 +107,11 @@ fips <- merge(x = fips.county, y = fips.state, by = "fips.state", all.x = TRUE)
 fips <- fips[complete.cases(fips[, "state"]), ]
 ```
 
+\newpage
+
 # Import Census Bureau Population Estimates
 
-```{r}
+```{r, message = FALSE}
 pop <- read_excel("pop.xlsx", skip = 3)
 ```
 
@@ -152,6 +155,10 @@ pop <- rbind(
 )
 ```
 
+\newpage
+
+# Mutate
+
 ```{r}
 data <- merge(
   x = data, 
@@ -187,18 +194,14 @@ data <- data %>%
   ) %>%
   
   mutate(
-    cases.new.7dsma = rollmean(cases.new, k = 7, fill = 0, align = "right"),
-    deaths.new.7dsma = rollmean(deaths.new, k = 7, fill = 0, align = "right"),
+    cases.new.7dsma = rollmean(cases.new, 7, fill = 0, align = "right"),
+    deaths.new.7dsma = rollmean(deaths.new, 7, fill = 0, align = "right"),
     
-    cases.new.percap.7dsma = 
-      rollmean(cases.new.percap, k = 7, fill = 0, align = "right"),
-    deaths.new.percap.7dsma = 
-      rollmean(deaths.new.percap, k = 7, fill = 0, align = "right"),
+    cases.new.percap.7dsma = rollmean(cases.new.percap, 7, fill = 0, align = "right"),
+    deaths.new.percap.7dsma = rollmean(deaths.new.percap, 7, fill = 0, align = "right"),
     
-    cases.new.perM.7dsma = 
-      rollmean(cases.new.perM, k = 7, fill = 0, align = "right"),
-    deaths.new.perM.7dsma = 
-      rollmean(deaths.new.perM, k = 7, fill = 0, align = "right"),
+    cases.new.perM.7dsma = rollmean(cases.new.perM, 7, fill = 0, align = "right"),
+    deaths.new.perM.7dsma = rollmean(deaths.new.perM, 7, fill = 0, align = "right"),
   ) %>%
   
   mutate(
@@ -210,47 +213,4 @@ data <- data %>%
 
 ```{r}
 write_csv(data, "data.csv")
-```
-
-\newpage
-
-# Binomial Probability Distriubtion: Cumulative Density Function
-
-```{r}
-x = 0
-n = 100
-p = as.numeric(data[
-  data$state == "New York" & data$county == "Westchester" & data$date == max(data$date),
-  "cases.active.perM"
-])
-```
-
-```{r}
-p
-```
-
-\begin{align}
-1 - P \left( q > x | n, prob \right) &= 1 - {n \choose x} \cdot prob^x \cdot \left( 1 - prob \right)^{\left(n - x\right)} \\
-1 - P \left( q > `r x` | n = `r n`, prob = `r round(p, 0)` \cdot 10^{-6} \right) &= 1 - \frac{`r n`!}{`r x`! \left( `r n` - `r x` \right) !} \cdot \left( `r round(p, 0)` \cdot 10^{-6} \right) ^ `r x` \cdot \left ( 1 - `r round(p, 0)` \cdot 10^{-6} \right)^{\left(`r n` - `r x`\right)}
-\end{align}
-
-```{r}
-cdf <- data.frame()
-for (i in c(1, 5, 10, 25, 100, 250, 500, 1000, 2500, 5000, 10000)) {
-  
-  temp <- data.frame(
-    n = i, 
-    prob = pbinom(q = x, size = i, prob = p * 10^-6, lower.tail = FALSE) * 100
-  )
-  
-  cdf <- rbind(cdf, temp)
-  
-}
-```
-
-```{r, echo = FALSE}
-kable(
-  caption = "Probability of Exposure to AT LEAST n Actively Contageous Persons. Assumes 9-Day Infectious Period",
-  x = cdf %>% mutate(prob = round(prob, 1))
-)
 ```
