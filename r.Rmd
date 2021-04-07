@@ -28,7 +28,7 @@ nytimes <- read.csv(
 setwd("/Users/tylerdegroff/Documents/Github/Coronavirus")
 ```
 
-**Source:** New York Times, The, Smith, M., Yourish, K., Almukhtar, S., Collins, K., Ivory, D., & Harmon, A. (2020-2021, January–January). *Coronavirus (Covid-19) Data in the United States* [Cumulative counts of coronavirus cases in the United States, at the county level, over time (daily frequency).]. Github. https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv
+**Source:** New York Times, The, Smith, M., Yourish, K., Almukhtar, S., Collins, K., Ivory, D., & Harmon, A. (2020-2021, January--January). *Coronavirus (Covid-19) Data in the United States* [Cumulative counts of coronavirus cases in the United States, at the county level, over time (daily frequency).]. Github. <https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv>
 
 \bigskip
 
@@ -67,7 +67,7 @@ data <- data %>%
 fips.state <- read_excel("fips.state.xlsx", skip = 4)
 ```
 
-**Source:** United States Census Bureau. (2020, May 20). *2019 Census Bureau Region and Division Codes and State FIPS Codes* [Reference file for vintage 2019 Census Bureau state-level FIPS codes.]. United States Department of Commerce. https://www2.census.gov/programs-surveys/popest/geographies/2019/state-geocodes-v2019.xlsx
+**Source:** United States Census Bureau. (2020, May 20). *2019 Census Bureau Region and Division Codes and State FIPS Codes* [Reference file for vintage 2019 Census Bureau state-level FIPS codes.]. United States Department of Commerce. <https://www2.census.gov/programs-surveys/popest/geographies/2019/state-geocodes-v2019.xlsx>
 
 \bigskip
 
@@ -83,7 +83,7 @@ fips.state <- fips.state %>%
 fips.granular <- read_excel("fips.granular.xlsx", skip = 4)
 ```
 
-**Source** United States Census Bureau. (2020, May 20). *2019 State, County, Minor Civil Division, and Incorporated Place FIPS Codes* [Reference file for vintage 2019 Census Bureau county-level FIPS codes.]. United States Department of Commerce. https://www2.census.gov/programs-surveys/popest/geographies/2019/all-geocodes-v2019.xlsx
+**Source** United States Census Bureau. (2020, May 20). *2019 State, County, Minor Civil Division, and Incorporated Place FIPS Codes* [Reference file for vintage 2019 Census Bureau county-level FIPS codes.]. United States Department of Commerce. <https://www2.census.gov/programs-surveys/popest/geographies/2019/all-geocodes-v2019.xlsx>
 
 \bigskip
 
@@ -115,7 +115,7 @@ fips <- fips[complete.cases(fips[, "state"]), ]
 pop <- read_excel("pop.xlsx", skip = 3)
 ```
 
-**Source:** United States Census Bureau. (2010–2019, April 1–July 1). *County Population Totals: 2010-2019* [Annual estimates of the county-level resident population, over time (annual frequency).]. United States Department of Commerce. https://www2.census.gov/programs-surveys/popest/tables/2010-2019/counties/totals/co-est2019-annres.xlsx
+**Source:** United States Census Bureau. (2010--2019, April 1--July 1). *County Population Totals: 2010-2019* [Annual estimates of the county-level resident population, over time (annual frequency).]. United States Department of Commerce. <https://www2.census.gov/programs-surveys/popest/tables/2010-2019/counties/totals/co-est2019-annres.xlsx>
 
 ```{r, message = FALSE}
 pop <- pop %>%
